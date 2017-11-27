@@ -12,8 +12,11 @@
                         <a href="/login.html">登录</a>
                         <a href="/register.html">注册</a>
                         <strong>|</strong>
-                        <!--<a href="/content/contact.html"><i class="iconfont icon-phone"></i>联系我们</a>
-                                           <a href="/cart.html"><i class="iconfont icon-cart"></i>购物车(<span id="shoppingCartCount"><script type="text/javascript" src="/tools/submit_ajax.ashx?action=view_cart_count"></script></span>)</a>-->
+                        <!-- <a href="/content/contact.html"><i class="iconfont icon-phone"></i>联系我们</a> -->
+                        <a id="layoutbuycar" href="/cart.html">
+                            <i class="iconfont icon-cart"></i>
+                            购物车(<span id="shoppingCartCount">{{buyTotalCount}}</span>)
+                        </a>
                     </div>
                 </div>
             </div>
@@ -75,13 +78,18 @@
 </template>
 
 <script>
+    // 按需导入bus.js vm 对象
+    import { vm, KEY } from './kits/bus.js'
 
     export default {
         data() {
             return {
+                // 定义用户购买的商品总数--用于显示到购物车图标中
+                buyTotalCount: 0
             }
         },
         mounted() {
+            // 1-头部
             $("#menu2 li a").wrapInner('<span class="out"></span>');
             $("#menu2 li a").each(function () {
                 $('<span class="over">' + $(this).text() + '</span>').appendTo(this);
@@ -95,6 +103,21 @@
                 $(".out", this).stop().animate({ 'top': '0px' }, 300); // move up - show
                 $(".over", this).stop().animate({ 'top': '-48px' }, 300); // move up - hide
             });
+             // 2- 将曾经购买的总数加载回来
+            
+             var buyNnmber = localStorage.getItem("buyTotalCount");
+             console.log(buyNnmber);
+             if (buyNnmber !="NaN") {
+                 this.buyTotalCount = parseInt(buyNnmber);
+             }
+            // 3-利用vm 中的$on()完成事件的监听--接收从goodsinfo.vue组件中传过来的数据
+            //buycount--就是goodsinfo.vue组件中传过来的数量
+            vm.$on(KEY,(buycount)=>{
+                // console.log(buycount);
+                this.buyTotalCount += buycount;
+                //将总数据储存到localStorage中
+                localStorage.setItem("buyTotalCount",this.buyTotalCount);
+            })
         },
         methods: {
         }

@@ -17,6 +17,8 @@ Vue.use(VueRouter);
 // 3.0.2 导入组件对象
 import layout from './components/layout.vue';
 import goodslist from './components/goods/goodslist.vue';
+import goodsinfo from './components/goods/goodsinfo.vue';
+import goodscar from './components/goods/goodscar.vue';
 
 // 3.0.2 实例化对象并且定义路由规则
 var router = new VueRouter({
@@ -28,7 +30,9 @@ var router = new VueRouter({
             name: "layout", path: "/site", component: layout,
             children: [
                 // 商品列表
-                { name: "goodslist", path: "goodslist", component: goodslist }
+                { name: "goodslist", path: "goodslist", component: goodslist },
+                { name: "goodsinfo", path: "goodsinfo/:goodsid", component: goodsinfo },
+                { name: "goodsinfo", path: "goodsinfo/:goodsid", component: goodsinfo }
             ]
         }
     ]
@@ -42,6 +46,10 @@ import '../statics/elementUICSS/index.css';
 
 // 导入自己编写的全局样式
 import '../statics/site/css/style.css';
+
+// 按需引入iview 组件
+import { Affix } from 'iview';
+Vue.component('Affix', Affix);
 
 // 绑定到vue中
 Vue.use(elementUI);
@@ -59,13 +67,20 @@ axios.defaults.withCredentials = true;
 Vue.prototype.$ajax = axios;
 
 // 6.0 定义一个全局过滤器
-Vue.filter('datefmt', (input) => {
+Vue.filter('datefmt', (input, fmtstring) => {
     var date = new Date(input);
     var y = date.getFullYear();
     var m = date.getMonth() + 1;
     var d = date.getDate();
+    var h = date.getHours();
+    var mm = date.getMinutes();
+    var ss = date.getSeconds();
+
+    if (fmtstring == 'YYYY-MM-DD HH:mm:ss') {
+        return y + "-" + m + "-" + d + " " + h + ":" + mm + ":" + ss;
+    }
     return y + "-" + m + "-" + d;
-    
+
 })
 
 // 3.0 实例化vue对象

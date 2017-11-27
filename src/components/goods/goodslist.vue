@@ -51,7 +51,9 @@
                             <div id="focus-box" class="focus-box">
                                 <el-carousel :interval="5000" arrow="always">
                                     <el-carousel-item v-for="item in topinfo.sliderlist" :key="item.id">
-                                        <img height="368" width="368" :src="item.img_url" alt="">
+                                        <router-link v-bind="{to:'/site/goodsinfo/'+item.id}">
+                                            <img height="368" width="368" :src="item.img_url" alt="">
+                                        </router-link>
                                         <h3>{{ item.title }}</h3>
                                     </el-carousel-item>
                                 </el-carousel>
@@ -85,7 +87,7 @@
         <div class="section" v-for="item in goodsgroup" :key="item.level1cateid">
 
             <!--子类-->
-            <div class="main-tit" >
+            <div class="main-tit">
                 <h2>{{item.catetitle}}</h2>
                 <p>
 
@@ -131,7 +133,7 @@
         data() {
             return {
                 topinfo: {},
-                goodsgroup:[]//用来存储页面底部的分类中的商品数据
+                goodsgroup: []//用来存储页面底部的分类中的商品数据
             }
         },
         mounted() {
@@ -146,7 +148,7 @@
                     this.topinfo = res.data.message;
                 })
             },
-            getgoodsgroup(){
+            getgoodsgroup() {
                 var url = "/site/goods/getgoodsgroup";
                 this.$ajax.get(url).then(res => {
                     // console.log(res.data.message);
