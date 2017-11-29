@@ -19,6 +19,9 @@ import layout from './components/layout.vue';
 import goodslist from './components/goods/goodslist.vue';
 import goodsinfo from './components/goods/goodsinfo.vue';
 import goodscar from './components/goods/goodscar.vue';
+import shopping from './components/goods/shopping.vue';
+import pay from './components/goods/pay.vue';
+import login from './components/account/login.vue';
 
 // 3.0.2 实例化对象并且定义路由规则
 var router = new VueRouter({
@@ -32,7 +35,14 @@ var router = new VueRouter({
                 // 商品列表
                 { name: "goodslist", path: "goodslist", component: goodslist },
                 { name: "goodsinfo", path: "goodsinfo/:goodsid", component: goodsinfo },
-                { name: "goodsinfo", path: "goodsinfo/:goodsid", component: goodsinfo }
+                // 购物车下单
+                { name: "goodscar", path: "goodscar", component: goodscar },
+                //下单
+                { name: "shopping", path: "shopping/:ids", component: shopping },
+                //支付页面
+                { name: "pay", path: "pay/:orderid", component: pay },
+                //登录
+                { name: "login", path: "login", component: login }
             ]
         }
     ]
@@ -82,11 +92,58 @@ Vue.filter('datefmt', (input, fmtstring) => {
     return y + "-" + m + "-" + d;
 
 })
+//vuex定义和集成
+import vuex from 'vuex';
+Vue.use(vuex);
+//定义四个核心对象
+var state = {
+    buyCount: 0
+}
+import { setItem, getItem } from "./components/kits/localStorageHelp.js";
+var mutations = {
+    // 定义一个changeCount方法来改变state中的buyCount值
+    // 参数state:代表的是上面定义好的state对象
+    // 参数parmsbuyCount:就是从程序员在调用的时候传入的（带业务才知道具体的参数有哪些）
+    changeCount(state, goodsobj) {
+        state.buyCount += goodsobj.count;
+
+        //将这个值存储在localStorage中
+        setItem(goodsobj);
+    }
+}
+var actions = {//在 外部写this.$store.dispatch('action定义好的方法名称'，传入的参数)
+    //定义一个changeCount方法来触发mutations中的某个方法
+    changeCount({ commit }, goodsobj) {
+        // commit中的第一个参数就是mutations 中的某个方法名称
+        commit('changeCount', goodsobj)
+    }
+}
+var getters = {//对state 中的某个属性进行封装处理（按业务逻辑处理）
+    getBuyCount(state) {//在任何视图上使用的代码如下： this.$store.getters.getBuyCount
+        if (state.buyCount > 0) {//state.buyCount > 0直接返回
+            return state.buyCount;
+        } else {
+            var obj = getItem();
+            var tcount = 0;
+            for (var key in obj) {
+                tcount += obj[key];
+            }
+            state.buyCount = tcount;
+            return tcount;
+        }
+    }
+
+}
+//实例化上述四个对象
+const store = new vuex.Store({
+    state, mutations, actions, getters
+})
 
 // 3.0 实例化vue对象
 new Vue({
     el: '#app',
     router,  //绑定路由对象使它生效
+    store,//在vue中注入store
     // render:function(create){create(App)}
     // 将app组件编译将这个组件中的内容填充到 el:指向的app这个div中
     render: create => create(App)

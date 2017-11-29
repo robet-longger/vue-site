@@ -276,11 +276,12 @@
             // 6-定义点击购物车实现数量添加
             addCar() {
                 //利用vm.$emit()触发事件，将购买的数量传给layout.vue组件
-                vm.$emit(KEY, this.currentBuyCount);
+                // vm.$emit(KEY, this.currentBuyCount);
                 //将得到的this.currentBuyCount存到localStorage中
                 var goodsObj = { gid: this.$route.params.goodsid, count: this.currentBuyCount };
-                console.log(goodsObj);
-                setItem(goodsObj);
+                // console.log(goodsObj);
+                // setItem(goodsObj);
+                this.$store.dispatch('changeCount',goodsObj)
                 //点击购物按钮显示图片
                 this.isshow = true;
 

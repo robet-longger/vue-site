@@ -13,10 +13,12 @@
                         <a href="/register.html">注册</a>
                         <strong>|</strong>
                         <!-- <a href="/content/contact.html"><i class="iconfont icon-phone"></i>联系我们</a> -->
-                        <a id="layoutbuycar" href="/cart.html">
+                        <!-- <a id="layoutbuycar" href="/cart.html"> -->
+                        <router-link id="layoutbuycar" to="/site/goodscar">
                             <i class="iconfont icon-cart"></i>
-                            购物车(<span id="shoppingCartCount">{{buyTotalCount}}</span>)
-                        </a>
+                            购物车(<span id="shoppingCartCount">{{this.$store.getters.getBuyCount}}</span>)
+                        </router-link>
+                        <!-- </a> -->
                     </div>
                 </div>
             </div>
@@ -85,7 +87,7 @@
         data() {
             return {
                 // 定义用户购买的商品总数--用于显示到购物车图标中
-                buyTotalCount: 0
+                // buyTotalCount: 0
             }
         },
         mounted() {
@@ -103,21 +105,22 @@
                 $(".out", this).stop().animate({ 'top': '0px' }, 300); // move up - show
                 $(".over", this).stop().animate({ 'top': '-48px' }, 300); // move up - hide
             });
-             // 2- 将曾经购买的总数加载回来
+            // 2- 将曾经购买的总数加载回来
+
+            // var buyNnmber = localStorage.getItem("buyTotalCount");
+            // console.log(buyNnmber);
+            // if (buyNnmber == "NaN") {
+            //     this.buyTotalCount = parseInt(buyNnmber);
+            // }
             
-             var buyNnmber = localStorage.getItem("buyTotalCount");
-             console.log(buyNnmber);
-             if (buyNnmber !="NaN") {
-                 this.buyTotalCount = parseInt(buyNnmber);
-             }
             // 3-利用vm 中的$on()完成事件的监听--接收从goodsinfo.vue组件中传过来的数据
             //buycount--就是goodsinfo.vue组件中传过来的数量
-            vm.$on(KEY,(buycount)=>{
-                // console.log(buycount);
-                this.buyTotalCount += buycount;
-                //将总数据储存到localStorage中
-                localStorage.setItem("buyTotalCount",this.buyTotalCount);
-            })
+            // vm.$on(KEY, (buycount) => {
+            //     // console.log(buycount);
+            //     this.buyTotalCount += buycount;
+            //     //将总数据储存到localStorage中
+            //     localStorage.setItem("buyTotalCount", this.buyTotalCount);
+            // })
         },
         methods: {
         }
@@ -125,5 +128,6 @@
 </script>
 <style scoped>
     /* 导入样式 */
+
     @import url('../../statics/jqplugins/jqhovernav/jqhoverNav.css');
 </style>
