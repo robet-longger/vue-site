@@ -5,10 +5,18 @@ var webpack = require('webpack');
 // 导入：html-webpack-plugin
 var htmlwp = require('html-webpack-plugin');
 
+var csstk = require('extract-text-webpack-plugin');
 
 module.exports = {
     // 1.0 指定webpack的打包的入口文件
-    entry: './src/main.js',
+    // 打包分离公共组件的第一步
+    entry: {
+        bulid: './src/main.js',
+        vendor1: ['vue', 'vue-router', 'vuex', 'axios'],
+        vendor2: ['element-ui'],
+        vendor3: ['v-distpicker'],
+        vendor4: ['jquery']
+    },
 
     // 2.0 指定打包完成的以后的输出文件
     output: {
@@ -17,7 +25,8 @@ module.exports = {
         // path.join(__dirname,'/dist'):在老师电脑上的输出结果：F:\广州13期Vue基础和项目\基础第三天\代码day03\03webpack学习\dist
         path: path.join(__dirname, '/dist'),
         // 这个文件名称可以自定义
-        filename: 'build.js'
+        //  // 打包分离公共组件的第三步：要将filename的名字改变成 [name].js
+        filename: '[name].js'
     },
     resolve: {
         alias: {
@@ -34,17 +43,20 @@ module.exports = {
             // 3.0.1 配置的是用来解析.css文件的loader(style-loader和css-loader)
             {
                 test: /\.css$/,//  用正则匹配当前访问的文件的后缀名是.css
-                loader: 'style-loader!css-loader'  //webpack底层调用这些包的顺序是从右到左
+                // loader: 'style-loader!css-loader'  //webpack底层调用这些包的顺序是从右到左
+                loader:csstk.extract({fallback:"style-loader",use:"css-loader"})
             },
             // 3.0.2 配置的是用来解析.less文件的loader(style-loader和css-loader和less-loader)
             {
                 test: /\.less$/,//  用正则匹配当前访问的文件的后缀名是.css
-                loader: 'style-loader!css-loader!less-loader'  //webpack底层调用这些包的顺序是从右到左
+                // loader: 'style-loader!css-loader!less-loader'  //webpack底层调用这些包的顺序是从右到左
+                loader:csstk.extract({fallback:"style-loader",use:"css-loader!less-loader"})
             },
             // 3.0.3 配置的是用来解析.scss文件的loader(style-loader和css-loader和sass-loader)
             {
                 test: /\.scss$/,//  用正则匹配当前访问的文件的后缀名是.css
-                loader: 'style-loader!css-loader!sass-loader'  //webpack底层调用这些包的顺序是从右到左
+                // loader: 'style-loader!css-loader!sass-loader'  //webpack底层调用这些包的顺序是从右到左
+                loader:csstk.extract({fallback:"style-loader",use:"css-loader!sass-loader"})
             },
             // 3.0.4 配置的是用来解析.png,.jpg,.gif......文件的loader(url-loader)
             {
@@ -84,7 +96,13 @@ module.exports = {
         new webpack.ProvidePlugin({
             $: "jquery",
             jQuery: "jquery"
-        })
+        }),
+         // 打包分离公共组件的第2步
+         new webpack.optimize.CommonsChunkPlugin({
+            names: ["vendor4","vendor3","vendor2","vendor1"],  //注意在调用的地方要和定义的地方顺序相反
+            minChunks: Infinity
+        }),
+        new csstk("[name].css")
 
     ]
 }
