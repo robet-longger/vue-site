@@ -22,12 +22,21 @@ import goodscar from './components/goods/goodscar.vue';
 import shopping from './components/goods/shopping.vue';
 import pay from './components/goods/pay.vue';
 import login from './components/account/login.vue';
+import payamount from './components/pay/payamount.vue';
+import paysuccess from './components/pay/paysuccess.vue';
+import vipcenter from './components/vip/vipcenter.vue';
+import myorder from './components/vip/myorder.vue';
+import orderinfo from './components/vip/orderinfo.vue';
 
 // 3.0.2 实例化对象并且定义路由规则
 var router = new VueRouter({
     routes: [
         // 默认跳转的路由规则
         { name: 'default', path: '/', redirect: '/site/goodslist' },
+        // 由于payamount.vue是被手机打开的，所以不需要头部导航,所以路由规则注册在此处
+        { name: 'payamount', path: '/payamount/:orderid', component: payamount },
+        //支付成功页面
+        { name: 'paysuccess', path: '/paysuccess', component: paysuccess },
         // 布局
         {
             name: "layout", path: "/site", component: layout,
@@ -38,11 +47,19 @@ var router = new VueRouter({
                 // 购物车下单
                 { name: "goodscar", path: "goodscar", component: goodscar },
                 //下单
-                { name: "shopping", path: "shopping/:ids", component: shopping },
+                { name: "shopping", path: "shopping/:ids", component: shopping, meta: { checklogin: 'true' } },
                 //支付页面
-                { name: "pay", path: "pay/:orderid", component: pay },
+                { name: "pay", path: "pay/:orderid", component: pay, meta: { checklogin: 'true' } },
                 //登录
-                { name: "login", path: "login", component: login }
+                { name: "login", path: "login", component: login, meta: { noSave: 'true' } },
+                // pc端支付成功页面
+                { name: 'pcpaysuccess', path: 'pcpaysuccess', component: paysuccess },
+                //会员中心
+                { name: "vipcenter", path: "vipcenter", component: vipcenter, meta: { checklogin: 'true' } },
+                //订单详情页列表
+                { name: "myorder", path: "myorder", component: myorder, meta: { checklogin: 'true' } },
+                // 订单详情页
+                { name: "orderinfo", path: "orderinfo/:orderid", component: orderinfo, meta: { checklogin: 'true' } }
             ]
         }
     ]
@@ -75,6 +92,36 @@ axios.defaults.withCredentials = true;
 
 // 5.0.2 将axios对象绑定到Vue的原型属性 $ajax上，将来在任何组件中均可以通过this.$ajax中的get(),post() 就可以发出ajax请求了
 Vue.prototype.$ajax = axios;
+
+//使用一个全局守卫，保护页面的跳转验证
+/*
+ 职责1：在localStorage中记录用户访问的最后那个页面（存储一个路由对象），排除登录页面
+
+ 职责2：进行登录检查 
+*/
+router.beforeEach((to, from, next) => {
+    // 职责1：在localStorage中记录用户访问的最后那个页面（存储一个路由对象），排除登录页面
+    // console.log(to);
+    if (to.meta.noSave != 'true') {
+        //保存当前网址
+        localStorage.setItem('currentPath', to.path);
+    };
+    //职责2：进行登录检查 
+    if (to.meta.checklogin) {
+        //利用ajax进行登录判断请求判断
+        axios.get('/site/account/islogin').then(res => {
+            if (res.data.code == 'logined') {
+                //表示已经登录
+                next();
+            } else {
+                //表示未登录，须跳转登录页面
+                router.push({ name: 'login' });
+            }
+        })
+    } else {
+        next();
+    }
+})
 
 // 6.0 定义一个全局过滤器
 Vue.filter('datefmt', (input, fmtstring) => {

@@ -9,14 +9,17 @@
                         <a target="_blank" href="#"></a>
                     </div>
                     <div id="menu" class="right-box">
-                        <a href="/login.html">登录</a>
-                        <a href="/register.html">注册</a>
+                        <router-link v-if="!islogin" to="/site/login">登录</router-link>
+                        <a v-if="!islogin" href="/register.html">注册</a>
                         <strong>|</strong>
+                        <router-link to="/site/vipcenter" v-if="islogin">会员中心</router-link>
+                        <a v-if="islogin" @click='logout' href="javascript:void(0);">退出</a>
                         <!-- <a href="/content/contact.html"><i class="iconfont icon-phone"></i>联系我们</a> -->
                         <!-- <a id="layoutbuycar" href="/cart.html"> -->
                         <router-link id="layoutbuycar" to="/site/goodscar">
                             <i class="iconfont icon-cart"></i>
-                            购物车(<span id="shoppingCartCount">{{this.$store.getters.getBuyCount}}</span>)
+                            购物车(
+                            <span id="shoppingCartCount">{{this.$store.getters.getBuyCount}}</span>)
                         </router-link>
                         <!-- </a> -->
                     </div>
@@ -86,6 +89,7 @@
     export default {
         data() {
             return {
+                islogin: false
                 // 定义用户购买的商品总数--用于显示到购物车图标中
                 // buyTotalCount: 0
             }
@@ -105,24 +109,33 @@
                 $(".out", this).stop().animate({ 'top': '0px' }, 300); // move up - show
                 $(".over", this).stop().animate({ 'top': '-48px' }, 300); // move up - hide
             });
-            // 2- 将曾经购买的总数加载回来
-
-            // var buyNnmber = localStorage.getItem("buyTotalCount");
-            // console.log(buyNnmber);
-            // if (buyNnmber == "NaN") {
-            //     this.buyTotalCount = parseInt(buyNnmber);
-            // }
-            
-            // 3-利用vm 中的$on()完成事件的监听--接收从goodsinfo.vue组件中传过来的数据
-            //buycount--就是goodsinfo.vue组件中传过来的数量
-            // vm.$on(KEY, (buycount) => {
-            //     // console.log(buycount);
-            //     this.buyTotalCount += buycount;
-            //     //将总数据储存到localStorage中
-            //     localStorage.setItem("buyTotalCount", this.buyTotalCount);
-            // })
+            this.changelogin();
+            vm.$on('changelogin', (val) => {
+                this.changelogin();
+            })
         },
         methods: {
+            //注销
+            logout() {
+                this.$ajax.get('/site/account/logout').then(res => {
+                    if (res.data.status == 0) {
+                        localStorage.setItem('logined', false);
+                        //跳转到商品页面
+                        this.$router.push({ name: 'goodslist' });
+                        this.islogin = false;
+                    }
+                })
+            },
+            changelogin() {
+                var res = localStorage.getItem("logined");
+                if (res == 'true') {
+                    //已经登录
+                    this.islogin = true;
+                } else {
+                    //未登录
+                    this.islogin = false;
+                }
+            }
         }
     }
 </script>
